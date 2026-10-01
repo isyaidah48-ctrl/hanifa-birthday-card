@@ -197,6 +197,13 @@
     .confetti-layer { position: fixed; z-index: 30; inset: 0; overflow: hidden; pointer-events: none; }
     .confetti { position: absolute; top: -18px; left: var(--left); width: var(--size); height: calc(var(--size) * 1.8); border-radius: 5px 2px 5px 2px; background: var(--color); opacity: .95; animation: confettiFall var(--duration) cubic-bezier(.15,.7,.3,1) forwards; }
     @keyframes confettiFall { 0% { transform: translate3d(0,0,0) rotate(0); } 100% { opacity: 0; transform: translate3d(var(--drift), 112vh, 0) rotate(var(--rotation)); } }
+    .music-toggle { position: fixed; z-index: 12; right: clamp(14px, 4vw, 42px); bottom: 20px; display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,.9); border-radius: 999px; padding: 11px 15px; color: var(--pink-700); background: rgba(255,253,251,.88); box-shadow: 0 10px 26px rgba(194,76,123,.18); cursor: pointer; font-size: .82rem; font-weight: 800; backdrop-filter: blur(12px); transition: transform .2s ease, box-shadow .2s ease, background .2s ease; }
+    .music-toggle:hover, .music-toggle:focus-visible { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(194,76,123,.26); background: #fff; outline: none; }
+    .music-toggle.playing { color: #fff; background: linear-gradient(135deg, var(--pink-400), var(--pink-500)); }
+    .music-icon { display: inline-block; font-size: 1.05rem; }
+    .music-toggle.playing .music-icon { animation: musicBounce .8s ease-in-out infinite alternate; }
+    @keyframes musicBounce { from { transform: translateY(2px) rotate(-10deg); } to { transform: translateY(-3px) rotate(10deg); } }
+    .music-embed { position: fixed; z-index: -2; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
 
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
@@ -204,6 +211,8 @@
     }
 
     @media (max-width: 600px) {
+      .music-toggle { right: 14px; bottom: 14px; padding: 10px 13px; }
+      .music-toggle span:last-child { max-width: 82px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
       .topbar { padding: 13px 16px; }
       .brand { font-size: .94rem; }
       .progress-wrap { font-size: .7rem; }
@@ -222,6 +231,10 @@
     <div class="blob one"></div><div class="blob two"></div>
     <div class="particle-layer" aria-hidden="true"></div>
     <div class="confetti-layer" aria-hidden="true"></div>
+    <button class="music-toggle" id="musicToggle" type="button" aria-label="Play Best Day of My Life" aria-pressed="false">
+      <span class="music-icon" id="musicIcon">🎶</span><span id="musicLabel">play song</span>
+    </button>
+    <div class="music-embed" aria-hidden="true"><div id="musicFrame"></div></div>
     <header class="topbar">
       <div class="brand">for hanifa ♡</div>
       <div class="progress-wrap" aria-label="Progress kartu">
@@ -428,6 +441,7 @@
     </div>
   </div>
 
+    <script src="https://www.youtube.com/iframe_api"></script>
   <script>
     (() => {
       const pages = [...document.querySelectorAll('.page')];
@@ -437,6 +451,41 @@
       const modalTitle = document.getElementById('modalTitle');
       const modalText = document.getElementById('modalText');
       let current = 1;
+      const musicToggle = document.getElementById('musicToggle');
+      const musicIcon = document.getElementById('musicIcon');
+      const musicLabel = document.getElementById('musicLabel');
+      let musicPlayer = null;
+      let musicPlaying = false;
+
+      function setMusicState(playing) {
+        musicPlaying = playing;
+        musicToggle.classList.toggle('playing', playing);
+        musicToggle.setAttribute('aria-pressed', String(playing));
+        musicIcon.textContent = playing ? '🎵' : '🎶';
+        musicLabel.textContent = playing ? 'pause song' : 'play song';
+      }
+
+      window.onYouTubeIframeAPIReady = () => {
+        musicPlayer = new YT.Player('musicFrame', {
+          videoId: 'Y66j_BUCBMY',
+          playerVars: { autoplay: 0, controls: 0, disablekb: 1, loop: 1, playlist: 'Y66j_BUCBMY', playsinline: 1, rel: 0 },
+          events: {
+            onStateChange: event => {
+              if (event.data === YT.PlayerState.PLAYING) setMusicState(true);
+              if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) setMusicState(false);
+            }
+          }
+        });
+      };
+
+      musicToggle.addEventListener('click', () => {
+        if (!musicPlayer || typeof musicPlayer.getPlayerState !== 'function') {
+          window.open('https://www.youtube.com/watch?v=Y66j_BUCBMY', '_blank', 'noopener');
+          return;
+        }
+        if (musicPlaying) musicPlayer.pauseVideo();
+        else musicPlayer.playVideo();
+      });
       const particleLayer = document.querySelector('.particle-layer');
       const confettiLayer = document.querySelector('.confetti-layer');
       const particleSymbols = ['♡', '♥', '✦', '✧', '·', '🎀'];
