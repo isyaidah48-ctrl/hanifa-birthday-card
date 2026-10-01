@@ -39,8 +39,17 @@
     button { font: inherit; }
     .app { min-height: 100vh; position: relative; isolation: isolate; }
     .blob { position: fixed; z-index: -1; border-radius: 50%; filter: blur(1px); opacity: .45; pointer-events: none; }
-    .blob.one { width: 230px; height: 230px; background: #ffd0e2; top: -90px; right: -55px; }
-    .blob.two { width: 180px; height: 180px; background: #fff; bottom: 3%; left: -75px; }
+    .blob.one { width: 230px; height: 230px; background: #ffd0e2; top: -90px; right: -55px; animation: blobFloat 9s ease-in-out infinite; }
+    .blob.two { width: 180px; height: 180px; background: #fff; bottom: 3%; left: -75px; animation: blobFloat 11s ease-in-out -3s infinite reverse; }
+
+    .particle-layer { position: fixed; z-index: 1; inset: 0; overflow: hidden; pointer-events: none; }
+    .particle { position: absolute; bottom: -40px; left: var(--left); color: var(--color); font-size: var(--size); opacity: 0; filter: drop-shadow(0 4px 8px rgba(194,76,123,.15)); animation: floatUp var(--duration) linear var(--delay) infinite; }
+    @keyframes floatUp {
+      0% { opacity: 0; transform: translate3d(0, 0, 0) rotate(0deg) scale(.65); }
+      12% { opacity: .8; }
+      55% { opacity: .55; transform: translate3d(var(--drift), -55vh, 0) rotate(160deg) scale(1); }
+      100% { opacity: 0; transform: translate3d(calc(var(--drift) * -1), -112vh, 0) rotate(330deg) scale(.8); }
+    }
 
     .topbar {
       position: fixed;
@@ -60,10 +69,34 @@
     .progress { width: clamp(100px, 24vw, 210px); height: 8px; border-radius: 20px; background: rgba(237,110,159,.16); overflow: hidden; }
     .progress > span { display: block; height: 100%; width: 9%; border-radius: inherit; background: linear-gradient(90deg, var(--pink-400), var(--pink-500)); transition: width .35s ease; }
 
-    main { min-height: 100vh; padding: 84px 18px 110px; display: grid; place-items: center; }
+    main { min-height: 100vh; padding: 84px 18px 110px; display: grid; place-items: center; position: relative; z-index: 2; }
     .page { width: min(100%, 820px); display: none; animation: pageIn .45s ease both; }
     .page.active { display: block; }
+    .page.active .card { animation: cardEnter .68s cubic-bezier(.2,.8,.2,1) both; }
+    .page.active .eyebrow { animation: softPop .45s .05s both; }
+    .page.active h1, .page.active h2 { animation: titlePop .72s .1s both; }
+    .page.active .ribbon { animation: ribbonSway .8s .1s both; }
+    .page.active .date { animation: dateGlow 1s .35s both; }
+    .page.active .button-row { animation: softPop .5s .5s both; }
+    .page.active .check-item,
+    .page.active .wish,
+    .page.active .menu-row,
+    .page.active .rule,
+    .page.active .open-card { animation: listIn .55s var(--delay, .08s) cubic-bezier(.2,.8,.2,1) both; }
+    .page.active .check-item:nth-child(2), .page.active .wish:nth-child(2), .page.active .menu-row:nth-child(2), .page.active .rule:nth-child(2), .page.active .open-card:nth-child(2) { --delay: .14s; }
+    .page.active .check-item:nth-child(3), .page.active .wish:nth-child(3), .page.active .menu-row:nth-child(3), .page.active .rule:nth-child(3), .page.active .open-card:nth-child(3) { --delay: .2s; }
+    .page.active .check-item:nth-child(4), .page.active .wish:nth-child(4), .page.active .menu-row:nth-child(4), .page.active .rule:nth-child(4), .page.active .open-card:nth-child(4) { --delay: .26s; }
+    .page.active .check-item:nth-child(5), .page.active .wish:nth-child(5), .page.active .menu-row:nth-child(5), .page.active .rule:nth-child(5) { --delay: .32s; }
+    .page.active .check-item:nth-child(6), .page.active .wish:nth-child(6), .page.active .menu-row:nth-child(6), .page.active .rule:nth-child(6) { --delay: .38s; }
     @keyframes pageIn { from { opacity: 0; transform: translateY(12px) scale(.99); } to { opacity: 1; transform: none; } }
+    @keyframes cardEnter { from { opacity: 0; transform: translateY(22px) rotate(-1deg) scale(.97); } to { opacity: 1; transform: translateY(0) rotate(0) scale(1); } }
+    @keyframes softPop { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    @keyframes titlePop { 0% { opacity: 0; transform: translateY(16px) scale(.9); } 75% { transform: translateY(-3px) scale(1.02); } 100% { opacity: 1; transform: none; } }
+    @keyframes ribbonSway { 0% { opacity: 0; transform: rotate(-8deg) translateY(-8px); } 55% { transform: rotate(4deg); } 100% { opacity: 1; transform: rotate(0); } }
+    @keyframes dateGlow { from { opacity: 0; letter-spacing: .5em; text-shadow: 0 0 0 transparent; } to { opacity: 1; letter-spacing: .18em; text-shadow: 0 0 16px rgba(237,110,159,.35); } }
+    @keyframes listIn { from { opacity: 0; transform: translateX(-16px) scale(.96); } to { opacity: 1; transform: none; } }
+    @keyframes blobFloat { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(18px, 22px) scale(1.08); } }
+    @keyframes buttonBreathe { 0%,100% { box-shadow: 0 9px 20px rgba(237,110,159,.22); } 50% { box-shadow: 0 12px 28px rgba(237,110,159,.42); } }
 
     .card {
       position: relative;
@@ -153,6 +186,23 @@
     @keyframes float { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-5px) rotate(4deg); } }
     .sparkles { margin-top: 18px; color: var(--pink-400); font-size: 1.3rem; letter-spacing: .4em; }
 
+    .page.active .btn:not(.secondary) { animation: buttonBreathe 2.4s .75s ease-in-out infinite; }
+    .card::before { animation: cardOrb 7s ease-in-out infinite; }
+    .card::after { animation: cardOrb 9s ease-in-out -2s infinite reverse; }
+    @keyframes cardOrb { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-12px, 10px) scale(1.15); } }
+    .sparkles { animation: sparklePulse 2s ease-in-out infinite; }
+    @keyframes sparklePulse { 0%,100% { opacity: .65; transform: scale(.96) rotate(-2deg); } 50% { opacity: 1; transform: scale(1.12) rotate(2deg); } }
+    .note { animation: noteBreathe 4s ease-in-out infinite; }
+    @keyframes noteBreathe { 0%,100% { box-shadow: 0 0 0 rgba(237,110,159,0); } 50% { box-shadow: 0 8px 22px rgba(237,110,159,.1); } }
+    .confetti-layer { position: fixed; z-index: 30; inset: 0; overflow: hidden; pointer-events: none; }
+    .confetti { position: absolute; top: -18px; left: var(--left); width: var(--size); height: calc(var(--size) * 1.8); border-radius: 5px 2px 5px 2px; background: var(--color); opacity: .95; animation: confettiFall var(--duration) cubic-bezier(.15,.7,.3,1) forwards; }
+    @keyframes confettiFall { 0% { transform: translate3d(0,0,0) rotate(0); } 100% { opacity: 0; transform: translate3d(var(--drift), 112vh, 0) rotate(var(--rotation)); } }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+      .particle-layer, .confetti-layer { display: none; }
+    }
+
     @media (max-width: 600px) {
       .topbar { padding: 13px 16px; }
       .brand { font-size: .94rem; }
@@ -170,6 +220,8 @@
 <body>
   <div class="app">
     <div class="blob one"></div><div class="blob two"></div>
+    <div class="particle-layer" aria-hidden="true"></div>
+    <div class="confetti-layer" aria-hidden="true"></div>
     <header class="topbar">
       <div class="brand">for hanifa ♡</div>
       <div class="progress-wrap" aria-label="Progress kartu">
@@ -385,6 +437,44 @@
       const modalTitle = document.getElementById('modalTitle');
       const modalText = document.getElementById('modalText');
       let current = 1;
+      const particleLayer = document.querySelector('.particle-layer');
+      const confettiLayer = document.querySelector('.confetti-layer');
+      const particleSymbols = ['♡', '♥', '✦', '✧', '·', '🎀'];
+      const particleColors = ['#ed6e9f', '#f78fb7', '#b94b79', '#ffb9d3', '#d98bab'];
+
+      function seedParticles() {
+        for (let i = 0; i < 30; i += 1) {
+          const particle = document.createElement('span');
+          particle.className = 'particle';
+          particle.textContent = particleSymbols[i % particleSymbols.length];
+          particle.style.setProperty('--left', `${Math.random() * 100}%`);
+          particle.style.setProperty('--size', `${12 + Math.random() * 16}px`);
+          particle.style.setProperty('--duration', `${8 + Math.random() * 9}s`);
+          particle.style.setProperty('--delay', `${-Math.random() * 14}s`);
+          particle.style.setProperty('--drift', `${-70 + Math.random() * 140}px`);
+          particle.style.setProperty('--color', particleColors[i % particleColors.length]);
+          particleLayer.appendChild(particle);
+        }
+      }
+
+      function burst(amount = 24) {
+        const colors = ['#ed6e9f', '#f78fb7', '#ffd166', '#a8dadc', '#b8e0d2', '#cdb4db'];
+        for (let i = 0; i < amount; i += 1) {
+          const piece = document.createElement('span');
+          piece.className = 'confetti';
+          piece.style.setProperty('--left', `${35 + Math.random() * 30}%`);
+          piece.style.setProperty('--size', `${5 + Math.random() * 7}px`);
+          piece.style.setProperty('--duration', `${1.2 + Math.random() * .9}s`);
+          piece.style.setProperty('--drift', `${-240 + Math.random() * 480}px`);
+          piece.style.setProperty('--rotation', `${180 + Math.random() * 720}deg`);
+          piece.style.setProperty('--color', colors[i % colors.length]);
+          confettiLayer.appendChild(piece);
+          window.setTimeout(() => piece.remove(), 2400);
+        }
+      }
+
+      seedParticles();
+      window.setTimeout(() => burst(28), 450);
 
       const modalContent = {
         sad: {
@@ -406,10 +496,13 @@
       };
 
       function showPage(number) {
-        current = Math.max(1, Math.min(pages.length, number));
+        const nextPage = Math.max(1, Math.min(pages.length, number));
+        const changed = nextPage !== current;
+        current = nextPage;
         pages.forEach((page, index) => page.classList.toggle('active', index + 1 === current));
         progressBar.style.width = `${(current / pages.length) * 100}%`;
         progressLabel.textContent = `${current} / ${pages.length}`;
+        if (changed) window.setTimeout(() => burst(current === pages.length ? 54 : 18), 180);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
@@ -422,6 +515,7 @@
         modalTitle.textContent = content.title;
         modalText.textContent = content.text;
         modal.classList.add('show');
+        burst(12);
         document.getElementById('closeModal').focus();
       }
       function closeModal() { modal.classList.remove('show'); }
